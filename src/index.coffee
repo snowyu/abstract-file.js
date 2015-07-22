@@ -14,8 +14,6 @@ PassThrough     = stream.PassThrough
 streamify       = require 'stream-array'
 setImmediate    = setImmediate || process.nextTick
 
-PATH_SEP        = path.sep
-
 module.exports = class AbstractFile
   gfs = null
 

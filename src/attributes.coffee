@@ -8,8 +8,6 @@ stream          = require 'stream'
 Stream          = stream.Stream
 PassThrough     = stream.PassThrough
 
-PATH_SEP        = path.sep
-
 module.exports =
   cwd:
     value: ''
