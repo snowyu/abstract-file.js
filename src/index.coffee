@@ -57,12 +57,18 @@ module.exports = class AbstractFile
   toString: -> @path
   _inspect: -> '"'+@relative+'"'
   inspect: -> '<'+ @constructor.name + ' ' + @_inspect() + '>'
+  getOptions: (aOptions)->
+    result = @mergeTo(aOptions)
+    result.path = @path
+    result.base = @base
+    result.cwd = @cwd
+    result
 
   load: (aOptions, done)->
     if isFunction aOptions
       done = aOptions
       aOptions = null
-    aOptions = @mergeTo(aOptions)
+    aOptions = @getOptions(aOptions)
     checkValid = aOptions.validate isnt false
     unless @stat?
       @_loadStat aOptions, (err, stat)=>
@@ -89,7 +95,7 @@ module.exports = class AbstractFile
     @
   loadSync: (aOptions)->
     if isFunction(@_loadStatSync)
-      aOptions = @mergeTo(aOptions)
+      aOptions = @getOptions(aOptions)
       checkValid = aOptions.validate isnt false
       @stat = @_loadStatSync(aOptions) unless @stat?
       @validate() if checkValid
@@ -133,11 +139,11 @@ module.exports = class AbstractFile
     if isFunction aOptions
       done = aOptions
       aOptions = null
-    aOptions = @mergeTo(aOptions)
+    aOptions = @getOptions(aOptions)
     _loadStat aOptions, done
     @
   loadStatSync: (aOptions)->
-    aOptions = @mergeTo(aOptions)
+    aOptions = @getOptions(aOptions)
     if @_loadStatSync
       result = @_loadStatSync aOptions
     else
@@ -148,7 +154,7 @@ module.exports = class AbstractFile
     if isFunction aOptions
       done = aOptions
       aOptions = null
-    aOptions = @mergeTo(aOptions)
+    aOptions = @getOptions(aOptions)
     @_loadContent aOptions, (err, result)=>
       @contents = result unless err
       done(err, result)
@@ -156,7 +162,7 @@ module.exports = class AbstractFile
 
   loadContentSync: (aOptions)->
     if isFunction(@_loadContentSync)
-      aOptions = @mergeTo aOptions
+      aOptions = @getOptions aOptions
       @contents = result = @_loadContentSync aOptions
     else
       throw new TypeError 'loadContentSync not implemented'
@@ -168,13 +174,13 @@ module.exports = class AbstractFile
     if isBoolean aOptions
       raiseError = aOptions
       aOptions = null
-    aOptions = @mergeTo(aOptions)
+    aOptions = @getOptions(aOptions)
     result = @_validate aOptions
     if raiseError and not result
       throw new TypeError @name+': invalid path '+aOptions.path
     result
   isValid: (aOptions)->
-    @Validate(aOptions, false)
+    @validate(aOptions, false)
 
   getContentSync: (aOptions)->
     if isFunction aOptions
