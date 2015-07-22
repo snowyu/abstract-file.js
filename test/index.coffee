@@ -67,7 +67,7 @@ module.exports = fileBehaviorTest = ->
         done(err)
   describe '#_loadStatSync(options)', ->
     it 'should load a file stat object', ->
-      cwd = __dirname
+      cwd = @cwd || __dirname
       vPath = 'fixtures/folder'
       file = @File(cwd: cwd, path: vPath)
       stat = file._loadStatSync file.mergeTo()
@@ -78,14 +78,16 @@ module.exports = fileBehaviorTest = ->
     it 'should load contents of a path', ->
       contentsForLoad = @content
       loadContentTest = @loadContentTest
-      file = @File cwd: __dirname, path: @contentPath
+      cwd = @cwd || __dirname
+      file = @File cwd: cwd, path: @contentPath
       contents = file.loadContentSync()
       contents.should.be.equal file.contents
       loadContentTest contents, contentsForLoad
     it 'should load stream contents of a path', (done)->
       contentsForLoad = @content
       loadContentTest = @loadContentTest
-      file = @File cwd: __dirname, path: @contentPath
+      cwd = @cwd || __dirname
+      file = @File cwd: cwd, path: @contentPath
       contents = file.loadContentSync(buffer: false)
       contents.should.be.equal file.contents
       loadContentTest contents, contentsForLoad, false, done
@@ -93,7 +95,8 @@ module.exports = fileBehaviorTest = ->
     it 'should load contents of a path', (done)->
       contentsForLoad = @content
       loadContentTest = @loadContentTest
-      file = @File cwd: __dirname, path: @contentPath
+      cwd = @cwd || __dirname
+      file = @File cwd: cwd, path: @contentPath
       file.loadContent (err, contents)->
         if not err
           contents.should.be.equal file.contents
@@ -102,7 +105,8 @@ module.exports = fileBehaviorTest = ->
     it 'should load stream contents of a path', (done)->
       contentsForLoad = @content
       loadContentTest = @loadContentTest
-      file = @File cwd: __dirname, path: @contentPath
+      cwd = @cwd || __dirname
+      file = @File cwd: cwd, path: @contentPath
       file.loadContent buffer:false, (err, contents)->
         if not err
           contents.should.be.equal file.contents
@@ -112,7 +116,7 @@ module.exports = fileBehaviorTest = ->
 
   describe '#load', ->
     it 'should load a path(only file stat loaded)', (done)->
-      cwd = __dirname
+      cwd = @cwd || __dirname
       vPath = @contentPath
       file = @File(cwd: cwd, path: vPath)
       file.load (err, result)->
@@ -124,7 +128,8 @@ module.exports = fileBehaviorTest = ->
     it 'should load contents of a path', (done)->
       contentsForLoad = @content
       loadContentTest = @loadContentTest
-      file = @File cwd: __dirname, path: @contentPath
+      cwd = @cwd || __dirname
+      file = @File cwd: cwd, path: @contentPath
       file.load read:true, (err, contents)->
         if not err
           contents.should.be.equal file.contents
@@ -133,7 +138,8 @@ module.exports = fileBehaviorTest = ->
     it 'should load stream contents of a path', (done)->
       contentsForLoad = @content
       loadContentTest = @loadContentTest
-      file = @File cwd: __dirname, path: @contentPath
+      cwd = @cwd || __dirname
+      file = @File cwd: cwd, path: @contentPath
       file.load read:true,buffer:false, (err, contents)->
         if not err
           contents.should.be.equal file.contents
@@ -142,7 +148,7 @@ module.exports = fileBehaviorTest = ->
           done(err)
   describe '#loadSync', ->
     it 'should load a path(only file stat loaded)', ->
-      cwd = __dirname
+      cwd = @cwd || __dirname
       vPath = @contentPath
       file = @File(cwd: cwd, path: vPath)
       result = file.loadSync()
@@ -152,14 +158,16 @@ module.exports = fileBehaviorTest = ->
     it 'should load contents of a path', ->
       contentsForLoad = @content
       loadContentTest = @loadContentTest
-      file = @File cwd: __dirname, path: @contentPath
+      cwd = @cwd || __dirname
+      file = @File cwd: cwd, path: @contentPath
       contents = file.loadSync(read:true)
       contents.should.be.equal file.contents
       loadContentTest contents, contentsForLoad
     it 'should load stream contents of a path', (done)->
       contentsForLoad = @content
       loadContentTest = @loadContentTest
-      file = @File cwd: __dirname, path: @contentPath
+      cwd = @cwd || __dirname
+      file = @File cwd: cwd, path: @contentPath
       contents = file.loadSync(read:true, buffer: false)
       contents.should.be.equal file.contents
       loadContentTest contents, contentsForLoad, false, done
