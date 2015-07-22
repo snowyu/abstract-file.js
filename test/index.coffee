@@ -57,7 +57,7 @@ module.exports = fileBehaviorTest = ->
 
   describe '#_loadStat(options,done)', ->
     it 'should load a file stat object', (done)->
-      cwd = __dirname
+      cwd = @cwd || __dirname
       vPath = 'fixtures/folder'
       file = @File(cwd: cwd, path: vPath)
       file._loadStat file.mergeTo(), (err, stat)->
