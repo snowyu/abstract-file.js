@@ -1,6 +1,8 @@
 ## abstract-file [![npm](https://img.shields.io/npm/v/abstract-file.svg)](https://npmjs.org/package/abstract-file)
 
 [![Build Status](https://img.shields.io/travis/snowyu/abstract-file.js/master.svg)](http://travis-ci.org/snowyu/abstract-file.js)
+[![Code Climate](https://codeclimate.com/github/snowyu/abstract-file.js/badges/gpa.svg)](https://codeclimate.com/github/snowyu/abstract-file.js)
+[![Test Coverage](https://codeclimate.com/github/snowyu/abstract-file.js/badges/coverage.svg)](https://codeclimate.com/github/snowyu/abstract-file.js/coverage)
 [![downloads](https://img.shields.io/npm/dm/abstract-file.svg)](https://npmjs.org/package/abstract-file)
 [![license](https://img.shields.io/npm/l/abstract-file.svg)](https://npmjs.org/package/abstract-file)
 
