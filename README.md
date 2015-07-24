@@ -6,7 +6,10 @@
 [![downloads](https://img.shields.io/npm/dm/abstract-file.svg)](https://npmjs.org/package/abstract-file)
 [![license](https://img.shields.io/npm/l/abstract-file.svg)](https://npmjs.org/package/abstract-file)
 
-It can be used on any virtual file system, and stream supports.
+It can be used on any virtual file system, and stream supports. Inspired by [vinyl][vinyl].
+Try to keep compatibility with [vinyl][vinyl].
+
+[vinyl]:https://github.com/wearefractal/vinyl
 
 + abstract file information class
 + abstract file operation ability
@@ -17,7 +20,7 @@ It can be used on any virtual file system, and stream supports.
 
 ## Usage
 
-the load implementation is in the [custom-file](https://github.com/snowyu/custom-file.js) package
+the File and Folder load implementation is in the [custom-file](https://github.com/snowyu/custom-file.js) package
 
 
 ## API
@@ -100,3 +103,4 @@ these methods should be overrides:
 ## License
 
 MIT
+
