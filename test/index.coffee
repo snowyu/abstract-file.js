@@ -42,8 +42,8 @@ module.exports = fileBehaviorTest = ->
         base: cwd
         path: path.resolve cwd, __dirname
         stat: null
-    it 'should throw error if no path provided', ->
-      should.throw @File
+    it 'should throw error if no path provided when load is true', ->
+      should.throw @File.bind null, load:true
 
     it 'should create a file object via cwd,path arguments', ->
       cwd = '/he/llo'
