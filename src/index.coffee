@@ -11,8 +11,10 @@ stream          = require 'stream'
 attributes      = require './attributes'
 Stream          = stream.Stream
 PassThrough     = stream.PassThrough
-streamify       = require 'stream-array'
+streamify       = require './stream-array'
 setImmediate    = setImmediate || process.nextTick
+
+isStream        = (aStream)->aStream instanceof Stream
 
 module.exports = class AbstractFile
   gfs = null
@@ -23,8 +25,9 @@ module.exports = class AbstractFile
 
   setFS = (value)->
     gfs = value
-    path.cwd = value.cwd if value and isFunction value.cwd
-    gfs.path = path
+    if value
+      path.cwd = value.cwd if isFunction value.cwd
+      gfs.path = path
     return
 
   defineProperty @, 'fs', undefined,
@@ -42,21 +45,22 @@ module.exports = class AbstractFile
     aOptions?={}
     aOptions.path = aPath if aPath
     @initialize aOptions
-    throw new TypeError('path must be exist') unless @path?
     if aOptions.load
+      throw new TypeError('path must be exist') unless @path?
       if isFunction(done)
         @load(aOptions, done)
       else
         @loadSync(aOptions)
-
-  isStream: -> @contents instanceof Stream
+  orgIsSame = @::isSame
+  isSame: (obj)->orgIsSame.call @, obj, ['contents', 'history']
+  isStream: -> isStream @contents
   isBuffer: -> isBuffer @contents
   isDirectory: -> @stat? and isFunction(@stat.isDirectory) and @stat.isDirectory()
   toString: -> @path
   _inspect: -> '"'+@relative+'"'
   inspect: -> '<'+ @constructor.name + ' ' + @_inspect() + '>'
   getOptions: (aOptions)->
-    result = @mergeTo(aOptions)
+    result = @mergeTo(aOptions, ['contents','history'])
     result.path = @path
     result.base = @base
     result.cwd = @cwd
@@ -68,25 +72,27 @@ module.exports = class AbstractFile
       aOptions = null
     aOptions = @getOptions(aOptions)
     checkValid = aOptions.validate isnt false
+    loaded = @contents? and @validate(aOptions, false)
     unless @stat?
       @_loadStat aOptions, (err, stat)=>
         @stat = stat
         if !err and checkValid
           try @validate() catch err
-        return done(err) if err
-        if aOptions.read and stat? and !@contents?
+        return done.call(@, err) if err
+        if aOptions.read and stat? and !loaded
           @_loadContent aOptions, (err, result)=>
             @contents = result unless err
-            done err, result
+            done.call @, err, result
         else
-          done(null, @contents)
+          done.call @, null, @contents
         return
-    else if aOptions.read and !@contents?
+    else if aOptions.read and !loaded
       if checkValid
         try
           @validate()
         catch e
           done(e)
+          return @
       @loadContent(aOptions, done)
     else
       done(null, @contents)
@@ -97,14 +103,16 @@ module.exports = class AbstractFile
       checkValid = aOptions.validate isnt false
       @stat = @_loadStatSync(aOptions) unless @stat?
       @validate() if checkValid
-      if aOptions.read and @stat? and !@contents?
+      if aOptions.read and @stat? and !(@contents? and @validate(aOptions, false))
         if isFunction(@_loadContentSync)
           @contents = @_loadContentSync(aOptions)
         else
+          ### !pragma coverage-skip-next ###
           throw new TypeError '_loadContentSync not implemented'
       else
         @contents
     else
+      ### !pragma coverage-skip-next ###
       throw new TypeError '_loadStatSync not implemented'
 
   _loadStat: (aOptions, done)->
@@ -117,6 +125,7 @@ module.exports = class AbstractFile
           done(e)
         return
     else
+      ### !pragma coverage-skip-next ###
       done(new TypeError '_loadStat Async not implemented')
     @
 
@@ -130,6 +139,7 @@ module.exports = class AbstractFile
           done(e)
         return
     else
+      ### !pragma coverage-skip-next ###
       done(new TypeError '_loadContent Async not implemented')
     @
 
@@ -138,13 +148,17 @@ module.exports = class AbstractFile
       done = aOptions
       aOptions = null
     aOptions = @getOptions(aOptions)
-    _loadStat aOptions, done
+    @_loadStat aOptions, (err, stat)=>
+      @stat = stat unless err or aOptions.overwrite is false
+      done(err, stat)
     @
   loadStatSync: (aOptions)->
     aOptions = @getOptions(aOptions)
     if @_loadStatSync
       result = @_loadStatSync aOptions
+      @stat = result if aOptions.overwrite isnt false
     else
+      ### !pragma coverage-skip-next ###
       throw new TypeError '_loadStatSync not implemented'
     result
 
@@ -154,15 +168,17 @@ module.exports = class AbstractFile
       aOptions = null
     aOptions = @getOptions(aOptions)
     @_loadContent aOptions, (err, result)=>
-      @contents = result unless err
+      @contents = result unless err or aOptions.overwrite is false
       done(err, result)
     @
 
   loadContentSync: (aOptions)->
     if isFunction(@_loadContentSync)
       aOptions = @getOptions aOptions
-      @contents = result = @_loadContentSync aOptions
+      result = @_loadContentSync aOptions
+      @contents = result if aOptions.overwrite isnt false
     else
+      ### !pragma coverage-skip-next ###
       throw new TypeError 'loadContentSync not implemented'
     result
 
@@ -172,8 +188,11 @@ module.exports = class AbstractFile
     if isBoolean aOptions
       raiseError = aOptions
       aOptions = null
+    raiseError ?= true
     aOptions = @getOptions(aOptions)
     result = @_validate aOptions
+    if aOptions.read and result and @contents
+      result = @isStream() and !aOptions.buffer
     if raiseError and not result
       throw new TypeError @name+': invalid path '+aOptions.path
     result
@@ -181,20 +200,22 @@ module.exports = class AbstractFile
     @validate(aOptions, false)
 
   getContentSync: (aOptions)->
-    if isFunction aOptions
-      done = aOptions
-      aOptions = read: true
-    result = @loadSync(aOptions)
-    if aOptions and aOptions.skipSize and isBuffer result
+    aOptions = {} unless isObject aOptions
+    aOptions.buffer = true
+    aOptions.overwrite = false
+    result = @loadContentSync(aOptions)
+    if aOptions.skipSize and isBuffer result
       result = result.slice(aOptions.skipSize)
     result
 
   getContent: (aOptions, done)->
     if isFunction aOptions
       done = aOptions
-      aOptions = read: true
-    @load aOptions, (err, result)->
-      if aOptions and aOptions.skipSize and isBuffer result
+    aOptions = {} unless isObject aOptions
+    aOptions.buffer = true
+    aOptions.overwrite = false
+    @loadContent aOptions, (err, result)->
+      if aOptions.skipSize and isBuffer result
         result = result.slice(aOptions.skipSize)
       done(err, result)
 
@@ -220,4 +241,3 @@ module.exports = class AbstractFile
       aStream.end()
 
     return aStream
-
