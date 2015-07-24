@@ -7,6 +7,7 @@ cloneObject     = require 'util-ex/lib/clone-object'
 stream          = require 'stream'
 Stream          = stream.Stream
 PassThrough     = stream.PassThrough
+isStream        = (aStream)->aStream instanceof Stream
 
 module.exports =
   cwd:
@@ -45,9 +46,11 @@ module.exports =
   stat: null
   contents:
     assign: (value, dest, src, name)->
-      if value instanceof Stream
-        t = value.pipe(new PassThrough())
-        src.contents = value.pipe(new PassThrough())
+      if isStream value
+        opts =
+          objectMode: value._readableState.objectMode
+        t = value.pipe(new PassThrough(opts))
+        src.contents = value.pipe(new PassThrough(opts))
         value = t
       value
   # the skipped length from beginning of contents.
