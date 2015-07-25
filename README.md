@@ -20,7 +20,7 @@ Try to keep compatibility with [vinyl][vinyl].
 
 ## Usage
 
-the File and Folder load implementation is in the [custom-file](https://github.com/snowyu/custom-file.js) package
+the File and Folder load implementation are in the [custom-file](https://github.com/snowyu/custom-file.js) package
 
 
 ## API
@@ -35,7 +35,7 @@ the File and Folder load implementation is in the [custom-file](https://github.c
 * `history` *(ArrayOf String)*: the history of the path changes.
 * `stat` *(Stat)*: the file stats object. the `isDirectory()` method be used.
 * `contents` *(Buffer|ArrayOf(File)|Stream)*: the contents of the file.
-  * It's the array of `File`/`Folder` object or a read-dir-stream if the file is a folder.
+  * It's the array of `File` object or a [read-dir-stream](https://github.com/snowyu/read-dir-stream.js) if the file is a folder.
 * `skipSize` *(Integer)*: the skipped length from beginning of contents. used by `getContent()`.
   only for buffer.
 * `relative` *(String)*: readonly. the relative path from `path` to `base`.
@@ -90,7 +90,9 @@ the File and Folder load implementation is in the [custom-file](https://github.c
 * `validate(aFile, raiseError=true)`: the aFile object whether is valid.
 * `isDirectory()`: whether is directory.
 * `isBuffer()`: whether contents is buffer.
+  * TODO: treat the array of `File`(the folder contents) as buffer?
 * `isStream()`: whether contents is stream.
+* `toString()`: return the path.
 
 these methods should be overrides:
 
