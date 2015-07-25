@@ -30,7 +30,7 @@
   "dependencies": {
     "inherits-ex": "^1.1.1",
     "path.js": "^1.0.5",
-    "property-manager": "^0.9.6",
+    "property-manager": "^0.9.7",
     "readable-stream": "^2.0.2",
     "util-ex": "^0.3.9"
   },

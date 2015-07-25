@@ -47,12 +47,12 @@ module.exports =
   contents:
     assign: (value, dest, src, name)->
       if isStream value
+        target = src
+        src = dest unless src.loadContentSync
         opts =
-          objectMode: value._readableState.objectMode
+          overwrite:false
           highWaterMark: value._readableState.highWaterMark
-        t = value.pipe(new PassThrough(opts))
-        src.contents = value.pipe(new PassThrough(opts))
-        value = t
+        value = src.loadContentSync opts
       value
   # the skipped length from beginning of contents.
   # this could get the contents quickly later.
