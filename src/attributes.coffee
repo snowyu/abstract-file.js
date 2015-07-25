@@ -49,6 +49,7 @@ module.exports =
       if isStream value
         opts =
           objectMode: value._readableState.objectMode
+          highWaterMark: value._readableState.highWaterMark
         t = value.pipe(new PassThrough(opts))
         src.contents = value.pipe(new PassThrough(opts))
         value = t
