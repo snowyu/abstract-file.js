@@ -28,7 +28,8 @@ module.exports = class FakeFile
       else
         new Buffer(aOptions.path)
     else
-      streamifier.createReadStream(aOptions.path)
+      streamifier.createReadStream(aOptions.path, aOptions)
+
   # _loadStat: sinon.spy (aFile, done)->
   #   result =
   #     path: aFile.path
