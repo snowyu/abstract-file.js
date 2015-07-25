@@ -27,7 +27,8 @@ the File and Folder load implementation is in the [custom-file](https://github.c
 
 ### Properties
 
-* `path` *(String)*: the file path. it will be stored as absolute path always.
+* `path` *(File|String)*: the file path. it will be internally stored as absolute path always.
+  * It will get path string from the object's `path` attribute if it's an file object.
 * `cwd` *(String)*: the current working directroy.
 * `base` *(String)*: the base directory. used to calc the relative path.
   the default is `cwd` if it's empty.
@@ -73,11 +74,11 @@ the File and Folder load implementation is in the [custom-file](https://github.c
 * `loadContentSync(aOptions)`: Synchronous load file contents.
     * `buffer` *(Boolean)*: whether load file contents as buffer or stream, defaults to false.
     * return contents
-* `getContent(aOptions, done)`: Asynchronous get the file contents, skipSize used.
-  only for Buffer and File(not for folder)
+* `getContent(aOptions, done)`: Asynchronous get the file contents buffer, skipSize used.
+  only available for File(not for folder)
   * `done` *Function(err, content)*: the callback function.
-* `getContentSync(aOptions)`: Synchronous get the file contents, skipSize used.
-  only for Buffer and File(not for folder)
+* `getContentSync(aOptions)`: Synchronous get the file contents buffer, skipSize used.
+  only available for File(not for folder)
 * `loadStat(aOptions, done)`: Asynchronous load file stats.
   * `done` *Function(err, stat)*: the callback function.
 * `loadStatSync(aOptions)`: Synchronous load file stats.
