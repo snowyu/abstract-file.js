@@ -352,6 +352,7 @@ describe 'AbstractFile', ->
     it 'should pipe clone file object with stream', (done)->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff', load:true, read:true, highWaterMark:5
+      result.contents._readableState.should.have.property 'highWaterMark', 5
       obj = result.clone()
       data=''
       obj.contents._readableState.should.have.property 'highWaterMark', 5
@@ -360,4 +361,10 @@ describe 'AbstractFile', ->
       .on 'data', (dat)->data += dat.toString()
       .on 'end', ->
         data.should.be.equal result.path
-        done()
+        data = ''
+        result.contents
+        .on 'error', (err)->done(err)
+        .on 'data', (dat)->data += dat.toString()
+        .on 'end', ->
+          data.should.be.equal result.path
+          done()
