@@ -14,15 +14,20 @@ Try to keep compatibility with [vinyl][vinyl].
 [vinyl]:https://github.com/wearefractal/vinyl
 
 + abstract file information class
+* abstract [property-manager](https://github.com/snowyu/property-manager.js) to manage the file attributes.
 + abstract file operation ability
   + abstract load supports
     * load read:true, buffer:true
     * load stat
     * load content
+* abstract folder/directory supports: It's the array of file object and [read-dir-stream](https://github.com/snowyu/read-dir-stream.js)
+* abstract [path.js](https://github.com/snowyu/path.js)
+* abstract fs: It should apply via `AbstractFile.fs = fs`
+* abstract cwd: It should apply via `fs.cwd = process.cwd`
 
 ## Usage
 
-the File and Folder load implementation are in the [custom-file](https://github.com/snowyu/custom-file.js) package
+the File and Folder implementation are in the [custom-file](https://github.com/snowyu/custom-file.js) package.
 
 
 ## API
