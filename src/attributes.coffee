@@ -74,3 +74,7 @@ module.exports =
     assigned: false
     exported: false
     get: -> path.basename @path
+  extname:
+    assigned: false
+    exported: false
+    get: -> path.extname @path

@@ -95,6 +95,10 @@ describe 'AbstractFile', ->
     it 'should get basename', ->
       result = new File path: '/path/dff/xie.md', base: 'hhah', cwd: '/path/dff'
       result.basename.should.be.equal 'xie.md'
+  describe '#extname', ->
+    it 'should get extname', ->
+      result = new File path: '/path/dff/xie.md', base: 'hhah', cwd: '/path/dff'
+      result.extname.should.be.equal '.md'
   describe '#load', ->
     it 'should load stat', (done)->
       result = new FakeFile 'path',
