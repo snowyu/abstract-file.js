@@ -97,7 +97,6 @@ the File and Folder implementation are in the [custom-file](https://github.com/s
 * `validate(aFile, raiseError=true)`: the aFile object whether is valid.
 * `isDirectory()`: whether is directory.
 * `isBuffer()`: whether contents is buffer.
-  * TODO: treat the array of `File`(the folder contents) as buffer?
 * `isStream()`: whether contents is stream.
 * `toString()`: return the path.
 
