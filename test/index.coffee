@@ -83,6 +83,14 @@ module.exports = fileBehaviorTest = ->
       contents = file.loadContentSync()
       contents.should.be.equal file.contents
       loadContentTest contents, contentsForLoad
+    it 'should load text contents of a path', ->
+      contentsForLoad = @content
+      loadContentTest = @loadContentTest
+      cwd = @cwd || __dirname
+      file = @File cwd: cwd, path: @contentPath
+      contents = file.loadContentSync(text:true)
+      contents.should.be.equal file.contents
+      loadContentTest contents, contentsForLoad, 2
     it 'should load stream contents of a path', (done)->
       contentsForLoad = @content
       loadContentTest = @loadContentTest
@@ -101,6 +109,16 @@ module.exports = fileBehaviorTest = ->
         if not err
           contents.should.be.equal file.contents
           loadContentTest contents, contentsForLoad
+        done(err)
+    it 'should load text contents of a path', (done)->
+      contentsForLoad = @content
+      loadContentTest = @loadContentTest
+      cwd = @cwd || __dirname
+      file = @File cwd: cwd, path: @contentPath
+      file.loadContent text:true, (err, contents)->
+        if not err
+          contents.should.be.equal file.contents
+          loadContentTest contents, contentsForLoad, 2
         done(err)
     it 'should load stream contents of a path', (done)->
       contentsForLoad = @content
@@ -177,7 +195,8 @@ fileBehaviorTest.loadFileContent = (contents, expectedContents, buffer, done)->
     done = buffer
     buffer = null
   if buffer isnt false
-    contents.toString().should.be.equal expectedContents
+    contents = contents.toString() if buffer isnt 2
+    contents.should.be.equal expectedContents
   else
     contents.should.be.instanceof Stream
     contents.on 'error', (err)->done(err)
@@ -190,8 +209,9 @@ fileBehaviorTest.loadFolderContent= (contents, expectedContents, buffer, done)->
     done = buffer
     buffer = null
   if buffer isnt false
-    contents = contents.map (f)->f.relative
-    contents.should.be.deep.equal expectedContents
+    if buffer isnt 2
+      contents = contents.map (f)->f.relative
+      contents.should.be.deep.equal expectedContents
   else
     result = []
     contents.should.be.instanceof Stream
