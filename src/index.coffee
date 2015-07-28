@@ -5,6 +5,7 @@ isFunction      = require 'util-ex/lib/is/type/function'
 isBoolean       = require 'util-ex/lib/is/type/boolean'
 isArray         = require 'util-ex/lib/is/type/array'
 isBuffer        = require 'util-ex/lib/is/type/buffer'
+isString        = require 'util-ex/lib/is/type/string'
 cloneObject     = require 'util-ex/lib/clone-object'
 defineProperty  = require 'util-ex/lib/defineProperty'
 stream          = require 'stream'
@@ -55,6 +56,7 @@ module.exports = class AbstractFile
   isSame: (obj)->orgIsSame.call @, obj, ['contents', 'history']
   isStream: -> isStream @contents
   isBuffer: -> isBuffer @contents
+  isText: -> isString @contents
   isDirectory: -> @stat? and isFunction(@stat.isDirectory) and @stat.isDirectory()
   toString: -> @path
   _inspect: -> '"'+@relative+'"'
@@ -204,7 +206,7 @@ module.exports = class AbstractFile
     aOptions.buffer = true
     aOptions.overwrite = false
     result = @loadContentSync(aOptions)
-    if aOptions.skipSize and isBuffer result
+    if aOptions.skipSize and isFunction result.slice
       result = result.slice(aOptions.skipSize)
     result
 
@@ -215,7 +217,7 @@ module.exports = class AbstractFile
     aOptions.buffer = true
     aOptions.overwrite = false
     @loadContent aOptions, (err, result)->
-      if aOptions.skipSize and isBuffer result
+      if aOptions.skipSize and isFunction result.slice
         result = result.slice(aOptions.skipSize)
       done(err, result)
 
@@ -224,20 +226,14 @@ module.exports = class AbstractFile
     options.end ?= true
 
     if @isStream()
-      return @contents.pipe(aStream, options)
-
-    if @isBuffer()
+      @contents.pipe(aStream, options)
+    else if @isBuffer() or @isText()
       if options.end
         aStream.end(@contents)
       else
         aStream.write(@contents)
-      return aStream
-
-    if isArray @contents
-      return streamify(@contents).pipe(aStream, options)
-
-    # isNull
-    if options.end
+    else if isArray @contents
+      streamify(@contents).pipe(aStream, options)
+    else if options.end # isNull
       aStream.end()
-
     return aStream

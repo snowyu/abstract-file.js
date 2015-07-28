@@ -12,6 +12,7 @@ fs              = require 'fs'
 fs.cwd          = process.cwd
 inherits        = require 'inherits-ex/lib/inherits'
 extend          = require 'util-ex/lib/_extend'
+isString        = require 'util-ex/lib/is/type/string'
 File            = require '../src'
 FakeFile        = require './fake-file'
 isStream        = (aStream)->aStream instanceof Stream
@@ -129,6 +130,13 @@ describe 'AbstractFile', ->
         should.exist contents
         contents.should.be.instanceof Stream
         done(err)
+    it 'should load text content', (done)->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff'
+      result.loadContent buffer:true, text: true, (err, contents)->
+        should.exist contents
+        contents.should.be.equal result.path
+        done(err)
     it 'should load content after stat', (done)->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff', load:true
@@ -169,6 +177,14 @@ describe 'AbstractFile', ->
       should.exist contents
       contents.should.be.instanceof Stream
       result.isBuffer().should.be.false
+    it 'should load text content', ->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff'
+      contents = result.loadContentSync buffer:true, text:true
+      should.exist contents
+      contents.should.be.equal result.path
+      result.isBuffer().should.be.false
+      result.isText().should.be.true
     it 'should load content after stat', ->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff', load:true
@@ -225,6 +241,13 @@ describe 'AbstractFile', ->
         should.exist contents
         contents.should.be.instanceof Buffer
         done(err)
+    it 'should getContent as text', (done)->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff',
+      result.getContent text:true, (err, contents)->
+        should.exist contents
+        contents.should.be.equal result.path
+        done(err)
     it 'should getContent with skipSize', (done)->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff',
@@ -250,6 +273,18 @@ describe 'AbstractFile', ->
       contents = result.getContentSync()
       should.exist contents
       contents.should.be.instanceof Buffer
+    it 'should getContent as text', ->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff',
+      contents = result.getContentSync text:true
+      should.exist contents
+      contents.should.be.equal result.path
+    it 'should getContent as text with skipSize', ->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff',
+      contents = result.getContentSync(skipSize:1, text:true)
+      should.exist contents
+      contents.should.be.equal result.path.substr(1)
     it 'should getContent with skipSize', ->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff',
@@ -298,24 +333,39 @@ describe 'AbstractFile', ->
         done(err)
       .on 'data', (data)->
         all += data.toString()
-
-    it 'should pipe an array', (done)->
+    it 'should pipe a buffer', (done)->
       result = new FakeFile 'path',
-        base: 'hhah', cwd: '/path/dff', load:true, read:true,dir:true,buffer:true
-      all = []
+        base: 'hhah', cwd: '/path/dff', load:true, read:true,buffer:true
+      all = ''
+      stream = through2 (dat, enc, cb)->
+        cb(null, dat)
+        return
+      result.pipe stream
+      .on 'end', ->
+        all.should.be.equal result.path
+        done()
+      .on 'error', (err)->
+        done(err)
+      .on 'data', (data)->
+        all += data.toString()
+
+    it 'should pipe a text', (done)->
+      result = new FakeFile 'path',
+        base: 'hhah',cwd: '/path/dff',load:true,read:true,buffer:true,text:true
+      all = ''
       should.exist result.contents
-      Array.isArray(result.contents).should.be.true
+      isString(result.contents).should.be.true
       stream = through2.obj (dat, enc, cb)->
         cb(null, dat)
         return
       result.pipe stream
       .on 'end', ->
-        all.should.be.deep.equal [1,2]
+        all.should.be.deep.equal result.path
         done()
       .on 'error', (err)->
         done(err)
       .on 'data', (data)->
-        all.push data
+        all += data
     it 'should pipe an null', (done)->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff'

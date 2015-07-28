@@ -41,7 +41,7 @@ the File and Folder implementation are in the [custom-file](https://github.com/s
   the default is `cwd` if it's empty.
 * `history` *(ArrayOf String)*: the history of the path changes.
 * `stat` *(Stat)*: the file stats object. the `isDirectory()` method be used.
-* `contents` *(Buffer|ArrayOf(File)|Stream)*: the contents of the file.
+* `contents` *(String|Buffer|ArrayOf(File)|Stream)*: the contents of the file.
   * It's the array of `File` object or a [read-dir-stream](https://github.com/snowyu/read-dir-stream.js) if the file is a folder.
 * `skipSize` *(Integer)*: the skipped length from beginning of contents. used by `getContent()`.
   only for buffer.
@@ -63,23 +63,33 @@ the File and Folder implementation are in the [custom-file](https://github.com/s
     * `read` *(Boolean)*: whether load file contents. defaults to false. only for `load` is true.
     * `buffer` *(Boolean)*: whether load file contents as buffer or stream, defaults to false.
        only available for `load` and `read` both are true.
+    * `text` *(Boolean)*: whether load file contents as text, defaults to false.
+       only available for `load`, `read` and `buffer` both are true.
   * `done` *(Function)*: the callback function only available for `load` is true.
     * the `loadSync` will be used if no `done` function.
 * `load(aOptions, done)`: Asynchronous load file stat and content.
     * `read` *(Boolean)*: whether load file contents. defaults to false.
     * `buffer` *(Boolean)*: whether load file contents as buffer or stream, defaults to false.
        only available for `read` is true.
+    * `text` *(Boolean)*: whether load file contents as text, defaults to false.
+       only available for `read` and `buffer` both are true.
   * `done` *Function(err, content)*: the callback function. the `content` only available when `read` is true
 * `loadSync(aOptions)`: Synchronous load file stat and content.
     * `read` *(Boolean)*: whether load file contents. defaults to false.
     * `buffer` *(Boolean)*: whether load file contents as buffer or stream, defaults to false.
        only available for `read` is true.
+    * `text` *(Boolean)*: whether load file contents as text, defaults to false.
+       only available for `read` and `buffer` both are true.
     * return contents only available when `read` is true
 * `loadContent(aOptions, done)`: Asynchronous load file contents.
     * `buffer` *(Boolean)*: whether load file contents as buffer or stream, defaults to false.
+    * `text` *(Boolean)*: whether load file contents as text, defaults to false.
+       only available for `buffer` is true.
   * `done` *Function(err, content)*: the callback function.
 * `loadContentSync(aOptions)`: Synchronous load file contents.
     * `buffer` *(Boolean)*: whether load file contents as buffer or stream, defaults to false.
+    * `text` *(Boolean)*: whether load file contents as text, defaults to false.
+       only available for `buffer` is true.
     * return contents
 * `getContent(aOptions, done)`: Asynchronous get the file contents buffer, skipSize used.
   only available for File(not for folder)
