@@ -1,19 +1,23 @@
+isArray   = require 'util-ex/lib/is/type/array'
+isBuffer  = require 'util-ex/lib/is/type/buffer'
+isString  = require 'util-ex/lib/is/type/string'
 inherits  = require 'inherits-ex/lib/inherits'
 Readable  = require('readable-stream').Readable
-isArray   = Array.isArray
 
-module.exports = class StreamArray
-  inherits StreamArray, Readable
+module.exports = class Streamifier
+  inherits Streamifier, Readable
 
-  constructor: (list) ->
-    return new StreamArray list unless @ instanceof StreamArray
-    ### !pragma coverage-skip-next ###
-    if !isArray(list)
-      throw new TypeError('First argument must be an Array')
-    Readable.call this, objectMode: true
+  constructor: (object, options) ->
+    return new Streamifier(object, options) unless @ instanceof Streamifier
+
+    options ?= {}
+    unless isBuffer(object) or isString(object)
+      options.objectMode = true
+    Readable.call this, options
+    object = [object] unless isArray object
     @_i = 0
-    @_l = list.length
-    @_list = list
+    @_l = object.length
+    @_list = object
     return
 
   _read: (size) ->

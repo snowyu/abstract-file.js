@@ -1,8 +1,7 @@
 sinon           = require 'sinon'
 inherits        = require 'inherits-ex/lib/inherits'
 Stream          = require('stream').Readable
-streamify       = require '../src/stream-array'
-streamifier     = require 'streamifier'
+streamifier     = require '../src/streamifier'
 AbstractFile    = require '../src/'
 
 module.exports = class FakeFile
@@ -28,7 +27,7 @@ module.exports = class FakeFile
       else
         new Buffer(aOptions.path)
     else
-      streamifier.createReadStream(aOptions.path, aOptions)
+      streamifier(aOptions.path, aOptions)
 
   # _loadStat: sinon.spy (aFile, done)->
   #   result =

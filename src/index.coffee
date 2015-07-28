@@ -11,7 +11,7 @@ stream          = require 'stream'
 attributes      = require './attributes'
 Stream          = stream.Stream
 PassThrough     = stream.PassThrough
-streamify       = require './stream-array'
+streamify       = require './streamifier'
 setImmediate    = setImmediate || process.nextTick
 
 isStream        = (aStream)->aStream instanceof Stream
