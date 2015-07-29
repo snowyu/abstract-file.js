@@ -87,6 +87,10 @@ describe 'AbstractFile', ->
     it 'should get relative path', ->
       result = new File path: '/path/dff/xie', base: 'hhah', cwd: '/path/dff'
       result.relative.should.be.equal '../xie'
+    it 'should get relative path with same base', ->
+      result = new File path: 'hha', cwd: '/path/dff'
+      result.base = '/path/dff/hha'
+      result.relative.should.be.equal '.'
   describe '#dirname', ->
     it 'should get dirname', ->
       result = new File path: '/path/dff/xie', base: 'hhah', cwd: '/path/dff'
@@ -108,14 +112,26 @@ describe 'AbstractFile', ->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff'
       result.load (err, contents)->
+        return done(err) if err
         should.not.exist contents
         should.exist result.stat
         result.isDirectory().should.be.false
+        done(err)
+    it 'should load content after stat', (done)->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff', load:true
+      should.exist result.stat
+      result.load read:true, (err, contents)->
+        return done(err) if err
+        should.exist contents
+        contents.should.be.instanceof Buffer
+        contents.should.be.equal result.contents
         done(err)
     it 'should reload content', (done)->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff', load:true, read:true
       result.load read:true, buffer:true, (err, contents)->
+        return done(err) if err
         should.exist contents
         contents.should.be.instanceof Buffer
         result.contents.should.be.equal contents
@@ -156,7 +172,7 @@ describe 'AbstractFile', ->
     it 'should load content buffer', (done)->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff'
-      result.loadContent buffer:true, (err, contents)->
+      result.loadContent (err, contents)->
         should.exist contents
         contents.should.be.instanceof Buffer
         done(err)
@@ -191,12 +207,12 @@ describe 'AbstractFile', ->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff', load:true
       result.loadContent buffer:false, (err, contents)->
-        return done(err) unless err
+        return done(err) if err
         should.exist contents
         contents.should.be.instanceof Stream
         contents.should.be.equal result.contents
         result.loadContent buffer:false, reload:true, (err, contents1)->
-          return done(err) unless err
+          return done(err) if err
           should.exist contents1
           contents1.should.be.instanceof Stream
           contents1.should.not.be.equal contents
@@ -205,21 +221,24 @@ describe 'AbstractFile', ->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff', load:true
       result.loadContent buffer:false, (err, contents)->
-        return done(err) unless err
+        return done(err) if err
         should.exist contents
         contents.should.be.instanceof Stream
-        result.loadContent buffer:false, (err, contents1)->
-          return done(err) unless err
+        contents.should.be.equal result.contents
+        result.loadContent buffer:false,skipSize:1, (err, contents1)->
+          return done(err) if err
+          result.skipSize.should.be.equal 1
           should.exist contents1
           contents1.should.be.instanceof Stream
           contents1.should.be.equal contents
+          assert.ok contents1 is contents
           result.loadContent (err, contents)->
-            return done(err) unless err
+            return done(err) if err
             should.exist contents
             contents.should.be.instanceof Buffer
             contents.should.be.equal result.contents
             result.loadContent buffer:true, (err, contents1)->
-              return done(err) unless err
+              return done(err) if err
               should.exist contents1
               contents1.should.be.instanceof Buffer
               contents1.should.be.equal contents
@@ -353,16 +372,17 @@ describe 'AbstractFile', ->
           s = contents.toString()
           s.should.be.equal result.path.substr(1)
           done(err)
-    it 'should getContent via fixed skipSize(loadContent)', (done)->
+    it 'should getContent text via fixed skipSize(loadContent)', (done)->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff',
-      result.loadContent read:true, skipSize:1, (err, c)->
-        result.skipSize.should.be.equal 1
-        result.getContent (err, contents)->
+      result.loadContent skipSize:-1, (err, c)->
+        result.skipSize.should.be.equal -1
+        result.getContent stat:true, text:true, skipSize:1, (err, contents)->
+          return done(err) if err
+          result.skipSize.should.be.equal -1
           should.exist contents
-          contents.should.be.instanceof Buffer
-          s = contents.toString()
-          s.should.be.equal result.path.substr(1)
+          #contents = contents.toString()
+          contents.should.be.equal result.path.substr(1)
           done(err)
     it 'should getContent after stream', (done)->
       result = new FakeFile 'path',
@@ -456,21 +476,21 @@ describe 'AbstractFile', ->
         done(err)
       .on 'data', (data)->
         all += data.toString()
-    it 'should pipe a buffer', (done)->
+    it 'should pipe a dir buffer', (done)->
       result = new FakeFile 'path',
-        base: 'hhah', cwd: '/path/dff', load:true, read:true
-      all = ''
-      stream = through2 (dat, enc, cb)->
+        base: 'hhah', cwd: '/path/dff', load:true, read:true, dir:true
+      all = []
+      stream = through2.obj (dat, enc, cb)->
         cb(null, dat)
         return
       result.pipe stream
       .on 'end', ->
-        all.should.be.equal result.path
+        all.should.be.deep.equal [1,2]
         done()
       .on 'error', (err)->
         done(err)
       .on 'data', (data)->
-        all += data.toString()
+        all.push data
 
     it 'should pipe a text', (done)->
       result = new FakeFile 'path',
@@ -489,6 +509,25 @@ describe 'AbstractFile', ->
         done(err)
       .on 'data', (data)->
         all += data
+
+    it 'should pipe a text with endless', (done)->
+      result = new FakeFile 'path',
+        base: 'hhah',cwd: '/path/dff',load:true,read:true,buffer:true,text:true
+      all = ''
+      should.exist result.contents
+      isString(result.contents).should.be.true
+      stream = through2.obj (dat, enc, cb)->
+        cb(null, dat)
+        return
+      result.pipe(stream, end:false)
+      .on 'end', ->
+        all.should.be.deep.equal result.path
+        done()
+      .on 'error', (err)->
+        done(err)
+      .on 'data', (data)->
+        all += data
+      stream.end()
     it 'should pipe an null', (done)->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff'
