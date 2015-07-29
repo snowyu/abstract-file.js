@@ -21,7 +21,7 @@ module.exports = class FakeFile
   #     result = new Stream
   #   done(aOptions.error, result)
   _loadContentSync: sinon.spy (aOptions)->
-    if aOptions.buffer
+    if aOptions.buffer isnt false
       if aOptions.dir
         [1,2]
       else if aOptions.text

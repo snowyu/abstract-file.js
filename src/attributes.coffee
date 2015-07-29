@@ -50,6 +50,7 @@ module.exports =
         target = src
         src = dest unless src.loadContentSync
         opts =
+          buffer: false
           overwrite:false
           highWaterMark: value._readableState.highWaterMark
         value = src.loadContentSync opts
