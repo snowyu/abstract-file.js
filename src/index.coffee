@@ -93,12 +93,11 @@ module.exports = class AbstractFile
         return
     else if aOptions.read and !loaded
       if checkValid
-        try
-          @validate()
-        catch e
-          done(e)
-          return @
-      @loadContent(aOptions, done)
+        try @validate() catch err
+      if err
+        done(err)
+      else
+        @loadContent(aOptions, done)
     else
       done(null, @contents)
     @
@@ -206,8 +205,7 @@ module.exports = class AbstractFile
       throw new TypeError 'loadContentSync not implemented'
     result
 
-  _validate: (aOptions)->
-    aOptions.stat?
+  _validate: (aOptions)-> aOptions.stat?
   validate: (aOptions, raiseError)->
     if isBoolean aOptions
       raiseError = aOptions
@@ -239,7 +237,7 @@ module.exports = class AbstractFile
     aOptions.buffer = true
     aOptions.overwrite = false
     @loadContent aOptions, (err, result)->
-      if aOptions.skipSize and isFunction result.slice
+      if result and aOptions.skipSize and isFunction result.slice
         result = result.slice(aOptions.skipSize)
       done(err, result)
 
