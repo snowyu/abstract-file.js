@@ -48,6 +48,7 @@ the File and Folder implementation are in the [custom-file](https://github.com/s
 * `relative` *(String)*: readonly. the relative path from `path` to `base`.
 * `dirname` *(String)*: readonly. the dirname of the `path`.
 * `basename` *(String)*: readonly. the basename of the `path`.
+* `extname` *(String)*: readonly. the extname of the `path`.
 
 
 ### Methods
@@ -61,7 +62,7 @@ the File and Folder implementation are in the [custom-file](https://github.com/s
       the default is `cwd` if it's empty.
     * `load` *(Boolean)*: whether load file data(stat and contents). defaults to false
     * `read` *(Boolean)*: whether load file contents. defaults to false. only for `load` is true.
-    * `buffer` *(Boolean)*: whether load file contents as buffer or stream, defaults to false.
+    * `buffer` *(Boolean)*: whether load file contents as buffer or stream, defaults to true.
        only available for `load` and `read` both are true.
     * `text` *(Boolean)*: whether load file contents as text, defaults to false.
        only available for `load`, `read` and `buffer` both are true.
@@ -69,27 +70,31 @@ the File and Folder implementation are in the [custom-file](https://github.com/s
     * the `loadSync` will be used if no `done` function.
 * `load(aOptions, done)`: Asynchronous load file stat and content.
     * `read` *(Boolean)*: whether load file contents. defaults to false.
-    * `buffer` *(Boolean)*: whether load file contents as buffer or stream, defaults to false.
+    * `buffer` *(Boolean)*: whether load file contents as buffer or stream, defaults to true.
        only available for `read` is true.
     * `text` *(Boolean)*: whether load file contents as text, defaults to false.
        only available for `read` and `buffer` both are true.
   * `done` *Function(err, content)*: the callback function. the `content` only available when `read` is true
 * `loadSync(aOptions)`: Synchronous load file stat and content.
     * `read` *(Boolean)*: whether load file contents. defaults to false.
-    * `buffer` *(Boolean)*: whether load file contents as buffer or stream, defaults to false.
+    * `buffer` *(Boolean)*: whether load file contents as buffer or stream, defaults to true.
        only available for `read` is true.
     * `text` *(Boolean)*: whether load file contents as text, defaults to false.
        only available for `read` and `buffer` both are true.
     * return contents only available when `read` is true
 * `loadContent(aOptions, done)`: Asynchronous load file contents.
-    * `buffer` *(Boolean)*: whether load file contents as buffer or stream, defaults to false.
+    * `buffer` *(Boolean)*: whether load file contents as buffer or stream, defaults to true.
     * `text` *(Boolean)*: whether load file contents as text, defaults to false.
        only available for `buffer` is true.
+    * `reload` *(Boolean)*: whether force to reload the contents from the file. defaults to false.
+    * `overwrite` *(Boolean)*: whether assign to this.contents after loading the contents from the file. defaults to true.
   * `done` *Function(err, content)*: the callback function.
 * `loadContentSync(aOptions)`: Synchronous load file contents.
-    * `buffer` *(Boolean)*: whether load file contents as buffer or stream, defaults to false.
+    * `buffer` *(Boolean)*: whether load file contents as buffer or stream, defaults to true.
     * `text` *(Boolean)*: whether load file contents as text, defaults to false.
        only available for `buffer` is true.
+    * `reload` *(Boolean)*: whether force to reload the contents from the file. defaults to false.
+    * `overwrite` *(Boolean)*: whether assign to this.contents after loading the contents from the file. defaults to true.
     * return contents
 * `getContent(aOptions, done)`: Asynchronous get the file contents buffer, skipSize used.
   only available for File(not for folder)
@@ -109,6 +114,7 @@ the File and Folder implementation are in the [custom-file](https://github.com/s
 * `isBuffer()`: whether contents is buffer.
 * `isStream()`: whether contents is stream.
 * `toString()`: return the path.
+* `replaceExt(extname)`: return the replaced extname's path string.
 
 these methods should be overrides:
 
@@ -118,6 +124,16 @@ these methods should be overrides:
 * _loadContent(aFile, done): optional
 * _loadStat(aFile, done): optional
 * _inspect()
+
+## Changes
+
+### v0.3
+
+* **broken** the default value of the `buffer` option is `true` now.
++ add `extName` readonly property
++ add `relaceExt` method to get the replaced extname's path string.
++ add the `reload`,`overwrite` option to loadContent/loadContentSync
+* assign the `skipSize` from options after loading.
 
 ## License
 

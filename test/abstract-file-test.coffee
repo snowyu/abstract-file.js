@@ -53,7 +53,7 @@ describe 'AbstractFile', ->
       should.exist result.stat
     it 'should create and load contents', ->
       result = new FakeFile 'path',
-        base: 'hhah', cwd: '/path/dff', load:true, read:true
+        base: 'hhah', cwd: '/path/dff', load:true, read:true, buffer:false
       result.should.have.property 'path', '/path/dff/hhah/path'
       should.exist result.stat
       should.exist result.contents
@@ -65,13 +65,13 @@ describe 'AbstractFile', ->
           done(err)
     it 'should create and load contents async', (done)->
       result = new FakeFile 'path',
-        base: 'hhah', cwd: '/path/dff', load:true, read:true, (err, contents)->
+        base: 'hhah', cwd: '/path/dff', load:true, read:true, buffer:false, (err, contents)->
           should.exist contents
           contents.should.be.instanceof Stream
           done(err)
     it 'should create and load contents buffer', ->
       result = new FakeFile 'path',
-        base: 'hhah', cwd: '/path/dff', load:true, read:true, buffer:true
+        base: 'hhah', cwd: '/path/dff', load:true, read:true
       result.should.have.property 'path', '/path/dff/hhah/path'
       should.exist result.stat
       should.exist result.contents
@@ -124,7 +124,7 @@ describe 'AbstractFile', ->
   describe '#loadSync', ->
     it 'should reload content', ->
       result = new FakeFile 'path',
-        base: 'hhah', cwd: '/path/dff', load:true, read:true
+        base: 'hhah', cwd: '/path/dff', load:true, read:true, buffer:false
       should.throw result.validate.bind(result, read:true,buffer:true)
       contents = result.loadSync read:true, buffer:true
       should.exist contents
@@ -134,7 +134,7 @@ describe 'AbstractFile', ->
     it 'should load content', (done)->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff'
-      result.loadContent (err, contents)->
+      result.loadContent buffer:false, (err, contents)->
         should.exist contents
         contents.should.be.instanceof Stream
         done(err)
@@ -148,7 +148,7 @@ describe 'AbstractFile', ->
     it 'should load content after stat', (done)->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff', load:true
-      result.loadContent (err, contents)->
+      result.loadContent buffer:false, (err, contents)->
         should.exist contents
         contents.should.be.instanceof Stream
         result.validate(false).should.be.true
@@ -170,18 +170,66 @@ describe 'AbstractFile', ->
     it 'should reload content', (done)->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff'
-      result.loadContent (err, contents)->
+      result.loadContent buffer:false, (err, contents)->
         should.exist contents
         contents.should.be.instanceof Stream
         result.loadContent buffer:true, (err, contents)->
           should.exist contents
           contents.should.be.instanceof Buffer
           done(err)
+    it 'should force reload content', ->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff', load:true
+      contents = result.loadContentSync(buffer:false)
+      should.exist contents
+      contents.should.be.instanceof Stream
+      contents1 = result.loadContentSync(buffer:false, reload:true)
+      should.exist contents1
+      contents1.should.be.instanceof Stream
+      contents1.should.not.be.equal contents
+    it 'should force reload content', (done)->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff', load:true
+      result.loadContent buffer:false, (err, contents)->
+        return done(err) unless err
+        should.exist contents
+        contents.should.be.instanceof Stream
+        contents.should.be.equal result.contents
+        result.loadContent buffer:false, reload:true, (err, contents1)->
+          return done(err) unless err
+          should.exist contents1
+          contents1.should.be.instanceof Stream
+          contents1.should.not.be.equal contents
+          done()
+    it 'should reuse content', (done)->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff', load:true
+      result.loadContent buffer:false, (err, contents)->
+        return done(err) unless err
+        should.exist contents
+        contents.should.be.instanceof Stream
+        result.loadContent buffer:false, (err, contents1)->
+          return done(err) unless err
+          should.exist contents1
+          contents1.should.be.instanceof Stream
+          contents1.should.be.equal contents
+          result.loadContent (err, contents)->
+            return done(err) unless err
+            should.exist contents
+            contents.should.be.instanceof Buffer
+            contents.should.be.equal result.contents
+            result.loadContent buffer:true, (err, contents1)->
+              return done(err) unless err
+              should.exist contents1
+              contents1.should.be.instanceof Buffer
+              contents1.should.be.equal contents
+              contents1.should.be.equal result.contents
+              done()
   describe '#loadContentSync', ->
     it 'should load content', ->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff'
-      contents = result.loadContentSync()
+      contents = result.loadContentSync(buffer:false)
       should.exist contents
       contents.should.be.instanceof Stream
       result.isBuffer().should.be.false
@@ -196,7 +244,7 @@ describe 'AbstractFile', ->
     it 'should load content after stat', ->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff', load:true
-      contents = result.loadContentSync()
+      contents = result.loadContentSync(buffer:false)
       should.exist contents
       contents.should.be.instanceof Stream
     it 'should load content buffer', ->
@@ -215,12 +263,41 @@ describe 'AbstractFile', ->
     it 'should reload content', ->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff', load:true
-      contents = result.loadContentSync()
+      contents = result.loadContentSync(buffer:false)
       should.exist contents
       contents.should.be.instanceof Stream
       contents = result.loadContentSync(buffer:true)
       should.exist contents
       contents.should.be.instanceof Buffer
+    it 'should force reload content', ->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff', load:true
+      contents = result.loadContentSync(buffer:false)
+      should.exist contents
+      contents.should.be.instanceof Stream
+      contents1 = result.loadContentSync(buffer:false, reload:true)
+      should.exist contents1
+      contents1.should.be.instanceof Stream
+      contents1.should.not.be.equal contents
+    it 'should reuse content', ->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff', load:true
+      contents = result.loadContentSync(buffer:false)
+      should.exist contents
+      contents.should.be.instanceof Stream
+      contents1 = result.loadContentSync(buffer:false)
+      should.exist contents1
+      contents1.should.be.instanceof Stream
+      contents1.should.be.equal contents
+      contents = result.loadContentSync()
+      should.exist contents
+      contents.should.be.instanceof Buffer
+      contents.should.be.equal result.contents
+      contents1 = result.loadContentSync(buffer:true)
+      should.exist contents1
+      contents1.should.be.instanceof Buffer
+      contents1.should.be.equal contents
+      contents1.should.be.equal result.contents
   describe '#loadStat', ->
     it 'should load stat', (done)->
       result = new FakeFile 'path',
@@ -265,6 +342,28 @@ describe 'AbstractFile', ->
         s = contents.toString()
         s.should.be.equal result.path.substr(1)
         done(err)
+    it 'should getContent via fixed skipSize(load)', (done)->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff',
+      result.load read:true, skipSize:1, (err, c)->
+        result.skipSize.should.be.equal 1
+        result.getContent (err, contents)->
+          should.exist contents
+          contents.should.be.instanceof Buffer
+          s = contents.toString()
+          s.should.be.equal result.path.substr(1)
+          done(err)
+    it 'should getContent via fixed skipSize(loadContent)', (done)->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff',
+      result.loadContent read:true, skipSize:1, (err, c)->
+        result.skipSize.should.be.equal 1
+        result.getContent (err, contents)->
+          should.exist contents
+          contents.should.be.instanceof Buffer
+          s = contents.toString()
+          s.should.be.equal result.path.substr(1)
+          done(err)
     it 'should getContent after stream', (done)->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff', load:true, read:true
@@ -293,6 +392,22 @@ describe 'AbstractFile', ->
       contents = result.getContentSync(skipSize:1, text:true)
       should.exist contents
       contents.should.be.equal result.path.substr(1)
+    it 'should getContent via fixed skipSize(load)', ->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff',
+      result.loadSync read:true, skipSize:1
+      result.skipSize.should.be.equal 1
+      contents = result.getContentSync(text:true)
+      should.exist contents
+      contents.should.be.equal result.path.substr(1)
+    it 'should getContent via fixed skipSize(loadContent)', ->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff',
+      result.loadContentSync read:true, skipSize:1
+      result.skipSize.should.be.equal 1
+      contents = result.getContentSync(text:true)
+      should.exist contents
+      contents.should.be.equal result.path.substr(1)
     it 'should getContent with skipSize', ->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff',
@@ -312,7 +427,7 @@ describe 'AbstractFile', ->
   describe '#pipe', ->
     it 'should pipe a stream', (done)->
       result = new FakeFile 'path',
-        base: 'hhah', cwd: '/path/dff', load:true, read:true
+        base: 'hhah', cwd: '/path/dff', load:true, read:true, buffer:false
       all = ''
       stream = through2 (dat, enc, cb)->
         cb(null, dat)
@@ -343,7 +458,7 @@ describe 'AbstractFile', ->
         all += data.toString()
     it 'should pipe a buffer', (done)->
       result = new FakeFile 'path',
-        base: 'hhah', cwd: '/path/dff', load:true, read:true,buffer:true
+        base: 'hhah', cwd: '/path/dff', load:true, read:true
       all = ''
       stream = through2 (dat, enc, cb)->
         cb(null, dat)
@@ -393,7 +508,8 @@ describe 'AbstractFile', ->
   describe '#clone', ->
     it 'should clone file object with stream', ->
       result = new FakeFile 'path',
-        base: 'hhah', cwd: '/path/dff', load:true, read:true
+        base: 'hhah', cwd: '/path/dff', load:true, read:true,buffer:false
+      result.contents.should.be.instanceof Stream
       obj = result.clone()
       should.exist obj.contents
       obj.contents.should.be.instanceof Stream
@@ -401,7 +517,7 @@ describe 'AbstractFile', ->
       obj.isSame(result).should.be.true
     it 'should clone dir object with stream', ->
       result = new FakeFile 'path',
-        base: 'hhah', cwd: '/path/dff', load:true, read:true,dir:true
+        base: 'hhah', cwd: '/path/dff', load:true, read:true,dir:true,buffer:false
       obj = result.clone()
       should.exist obj.contents
       obj.contents.should.be.instanceof Stream
@@ -409,7 +525,7 @@ describe 'AbstractFile', ->
       obj.isSame(result).should.be.true
     it 'should pipe clone file object with stream', (done)->
       result = new FakeFile 'path',
-        base: 'hhah', cwd: '/path/dff', load:true, read:true, highWaterMark:5
+        base: 'hhah', cwd: '/path/dff', load:true, read:true, highWaterMark:5,buffer:false
       result.contents._readableState.should.have.property 'highWaterMark', 5
       obj = result.clone()
       data=''
