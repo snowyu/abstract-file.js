@@ -130,10 +130,10 @@ these methods should be overrides:
 ### v0.3
 
 * **broken** the default value of the `buffer` option is `true` now.
-+ add `extName` readonly property
-+ add `relaceExt` method to get the replaced extname's path string.
 + add the `reload`,`overwrite` option to loadContent/loadContentSync
 * assign the `skipSize` from options after loading.
++ add `extName` readonly property
++ add `relaceExt` method to get the replaced extname's path string.
 
 ## License
 
