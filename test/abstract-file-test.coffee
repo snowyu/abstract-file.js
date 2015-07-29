@@ -99,6 +99,10 @@ describe 'AbstractFile', ->
     it 'should get extname', ->
       result = new File path: '/path/dff/xie.md', base: 'hhah', cwd: '/path/dff'
       result.extname.should.be.equal '.md'
+  describe '#replaceExt', ->
+    it 'should repalce the extname', ->
+      result = new File path: '/path/dff/xie.md', base: 'hhah', cwd: '/path/dff'
+      result.replaceExt('.coffee').should.be.equal '/path/dff/xie.coffee'
   describe '#load', ->
     it 'should load stat', (done)->
       result = new FakeFile 'path',

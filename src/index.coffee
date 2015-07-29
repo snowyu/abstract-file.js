@@ -58,6 +58,7 @@ module.exports = class AbstractFile
   isBuffer: -> isBuffer @contents
   isText: -> isString @contents
   isDirectory: -> @stat? and isFunction(@stat.isDirectory) and @stat.isDirectory()
+  replaceExt: (aExtName)->path.replaceExt @path, aExtName
   toString: -> @path
   _inspect: -> '"'+@relative+'"'
   inspect: -> '<'+ @constructor.name + ' ' + @_inspect() + '>'
