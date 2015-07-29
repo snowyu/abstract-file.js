@@ -133,7 +133,7 @@ these methods should be overrides:
 + add the `reload`,`overwrite` option to loadContent/loadContentSync
 * assign the `skipSize` from options after loading.
 + add `extName` readonly property
-+ add `relaceExt` method to get the replaced extname's path string.
++ add `replaceExt` method to get the replaced extname's path string.
 
 ## License
 
