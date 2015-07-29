@@ -84,7 +84,9 @@ module.exports = class AbstractFile
         return done.call(@, err) if err
         if aOptions.read and stat? and !loaded
           @_loadContent aOptions, (err, result)=>
-            @contents = result unless err
+            unless err
+              @contents = result
+              @skipSize = aOptions.skipSize if @skipSize isnt aOptions.skipSize
             done.call @, err, result
         else
           done.call @, null, @contents
@@ -108,6 +110,7 @@ module.exports = class AbstractFile
       @validate() if checkValid
       if aOptions.read and @stat? and !(@contents? and @validate(aOptions, false))
         if isFunction(@_loadContentSync)
+          @skipSize = aOptions.skipSize if @skipSize isnt aOptions.skipSize
           @contents = @_loadContentSync(aOptions)
         else
           ### !pragma coverage-skip-next ###
@@ -170,16 +173,34 @@ module.exports = class AbstractFile
       done = aOptions
       aOptions = null
     aOptions = @getOptions(aOptions)
-    @_loadContent aOptions, (err, result)=>
-      @contents = result unless err or aOptions.overwrite is false
-      done(err, result)
+    aOptions.read = true
+    if !aOptions.reload and (@contents? and @validate(aOptions, false))
+      result = @contents
+      result = result.toString() if aOptions.text and !isString result
+      if aOptions.overwrite isnt false
+        @skipSize = aOptions.skipSize if @skipSize isnt aOptions.skipSize
+      done(null, result)
+    else
+      @_loadContent aOptions, (err, result)=>
+        unless err or aOptions.overwrite is false
+          @contents = result
+          @skipSize = aOptions.skipSize if @skipSize isnt aOptions.skipSize
+        done(err, result)
+        return
     @
 
   loadContentSync: (aOptions)->
     if isFunction(@_loadContentSync)
       aOptions = @getOptions aOptions
-      result = @_loadContentSync aOptions
-      @contents = result if aOptions.overwrite isnt false
+      aOptions.read = true
+      if !aOptions.reload and (@contents? and @validate(aOptions, false))
+        result = @contents
+        result = result.toString() if aOptions.text and !isString result
+      else
+        result = @_loadContentSync aOptions
+      if aOptions.overwrite isnt false
+        @skipSize = aOptions.skipSize if @skipSize isnt aOptions.skipSize
+        @contents = result
     else
       ### !pragma coverage-skip-next ###
       throw new TypeError 'loadContentSync not implemented'
@@ -195,7 +216,7 @@ module.exports = class AbstractFile
     aOptions = @getOptions(aOptions)
     result = @_validate aOptions
     if aOptions.read and result and @contents
-      result = @isStream() and !aOptions.buffer
+      result = @isStream() == !(aOptions.buffer isnt false)
     if raiseError and not result
       throw new TypeError @name+': invalid path '+aOptions.path
     result
