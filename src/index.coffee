@@ -226,7 +226,7 @@ module.exports = class AbstractFile
     aOptions.buffer = true
     aOptions.overwrite = false
     result = @loadContentSync(aOptions)
-    if aOptions.skipSize and isFunction result.slice
+    if aOptions.skipSize > 0 and isFunction result.slice
       result = result.slice(aOptions.skipSize)
     result
 
@@ -237,7 +237,7 @@ module.exports = class AbstractFile
     aOptions.buffer = true
     aOptions.overwrite = false
     @loadContent aOptions, (err, result)->
-      if result and aOptions.skipSize and isFunction result.slice
+      if result and aOptions.skipSize > 0 and isFunction result.slice
         result = result.slice(aOptions.skipSize)
       done(err, result)
 
