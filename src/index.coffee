@@ -57,7 +57,10 @@ module.exports = class AbstractFile
   isStream: -> isStream @contents
   isBuffer: -> isBuffer @contents
   isText: -> isString @contents
-  isDirectory: -> @stat? and isFunction(@stat.isDirectory) and @stat.isDirectory()
+  isDirectory: ->
+    if @hasOwnProperty('stat') and @stat and isFunction(@stat.isDirectory)
+      result = @stat.isDirectory()
+    result
   replaceExt: (aExtName)->path.replaceExt @path, aExtName
   toString: -> @path
   _inspect: -> '"'+@relative+'"'
@@ -69,13 +72,17 @@ module.exports = class AbstractFile
     result.cwd = @cwd
     result
 
+  loaded: (aOptions)->
+    aOptions ?= @
+    @hasOwnProperty('contents') and @contents? and @validate(aOptions, false)
+
   load: (aOptions, done)->
     if isFunction aOptions
       done = aOptions
       aOptions = null
     aOptions = @getOptions(aOptions)
     checkValid = aOptions.validate isnt false
-    loaded = @contents? and @validate(aOptions, false)
+    loaded = @loaded(aOptions)
     unless @stat?
       @_loadStat aOptions, (err, stat)=>
         @stat = stat
@@ -107,7 +114,7 @@ module.exports = class AbstractFile
       checkValid = aOptions.validate isnt false
       @stat = @_loadStatSync(aOptions) unless @stat?
       @validate() if checkValid
-      if aOptions.read and @stat? and !(@contents? and @validate(aOptions, false))
+      if aOptions.read and @stat? and !@loaded(aOptions)
         if isFunction(@_loadContentSync)
           @skipSize = aOptions.skipSize if @skipSize isnt aOptions.skipSize
           @contents = @_loadContentSync(aOptions)
@@ -173,7 +180,7 @@ module.exports = class AbstractFile
       aOptions = null
     aOptions = @getOptions(aOptions)
     aOptions.read = true
-    if !aOptions.reload and (@contents? and @validate(aOptions, false))
+    if !aOptions.reload and @loaded(aOptions)
       result = @contents
       result = result.toString() if aOptions.text and !isString result
       if aOptions.overwrite isnt false
@@ -192,7 +199,7 @@ module.exports = class AbstractFile
     if isFunction(@_loadContentSync)
       aOptions = @getOptions aOptions
       aOptions.read = true
-      if !aOptions.reload and (@contents? and @validate(aOptions, false))
+      if !aOptions.reload and @loaded(aOptions)
         result = @contents
         result = result.toString() if aOptions.text and !isString result
       else
@@ -205,7 +212,7 @@ module.exports = class AbstractFile
       throw new TypeError 'loadContentSync not implemented'
     result
 
-  _validate: (aOptions)-> aOptions.stat?
+  _validate: (aOptions)-> aOptions.hasOwnProperty('stat') and aOptions.stat?
   validate: (aOptions, raiseError)->
     if isBoolean aOptions
       raiseError = aOptions
@@ -244,16 +251,18 @@ module.exports = class AbstractFile
   pipe: (aStream, options)->
     options ?= {}
     options.end ?= true
-
-    if @isStream()
-      @contents.pipe(aStream, options)
-    else if @isBuffer() or @isText()
-      if options.end
-        aStream.end(@contents)
-      else
-        aStream.write(@contents)
-    else if isArray @contents
-      streamify(@contents).pipe(aStream, options)
-    else if options.end # isNull
+    if @hasOwnProperty('contents')
+      if @isStream()
+        @contents.pipe(aStream, options)
+      else if @isBuffer() or @isText()
+        if options.end
+          aStream.end(@contents)
+        else
+          aStream.write(@contents)
+      else if isArray @contents
+        streamify(@contents).pipe(aStream, options)
+      else if options.end # isNull
+        aStream.end()
+    else if options.end # isUndefined
       aStream.end()
     return aStream

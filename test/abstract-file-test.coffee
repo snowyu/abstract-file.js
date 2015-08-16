@@ -11,6 +11,7 @@ through2        = require 'through2'
 fs              = require 'fs'
 fs.cwd          = process.cwd
 inherits        = require 'inherits-ex/lib/inherits'
+setPrototypeOf  = require 'inherits-ex/lib/setPrototypeOf'
 extend          = require 'util-ex/lib/_extend'
 isString        = require 'util-ex/lib/is/type/string'
 File            = require '../src'
@@ -528,11 +529,29 @@ describe 'AbstractFile', ->
       .on 'data', (data)->
         all += data
       stream.end()
-    it 'should pipe an null', (done)->
+    it 'should pipe an null contents', (done)->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff'
       all = []
       should.not.exist result.contents
+      stream = through2 (dat, enc, cb)->
+        cb(null, dat)
+        return
+      result.pipe stream
+      .on 'end', ->
+        all.should.have.length 0
+        done()
+      .on 'error', (err)->
+        done(err)
+      .on 'data', (data)->
+        all.push data
+    it 'should pipe an undefined contents', (done)->
+      base = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff'
+      all = []
+      result = {}
+      setPrototypeOf result, base
+      result.should.not.have.ownProperty 'contents'
       stream = through2 (dat, enc, cb)->
         cb(null, dat)
         return
