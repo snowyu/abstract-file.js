@@ -47,7 +47,6 @@ module.exports =
   contents:
     assign: (value, dest, src, name)->
       if isStream value
-        target = src
         src = dest unless src.loadContentSync
         opts =
           buffer: false
