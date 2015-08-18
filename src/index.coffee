@@ -231,7 +231,7 @@ module.exports = class AbstractFile
   getContentSync: (aOptions)->
     aOptions = {} unless isObject aOptions
     aOptions.buffer = true
-    aOptions.overwrite = false
+    aOptions.overwrite = false unless aOptions.overwrite?
     result = @loadContentSync(aOptions)
     if aOptions.skipSize > 0 and isFunction result.slice
       result = result.slice(aOptions.skipSize)
@@ -242,7 +242,7 @@ module.exports = class AbstractFile
       done = aOptions
     aOptions = {} unless isObject aOptions
     aOptions.buffer = true
-    aOptions.overwrite = false
+    aOptions.overwrite = false unless aOptions.overwrite?
     @loadContent aOptions, (err, result)->
       if result and aOptions.skipSize > 0 and isFunction result.slice
         result = result.slice(aOptions.skipSize)
