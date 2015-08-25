@@ -190,6 +190,31 @@ module.exports = fileBehaviorTest = ->
       contents.should.be.equal file.contents
       loadContentTest contents, contentsForLoad, false, done
 
+  describe '#getContentSync', ->
+    it 'should load text contents of a path', ->
+      contentsForLoad = @content
+      loadContentTest = @loadContentTest
+      cwd = @cwd || __dirname
+      file = @File cwd: cwd, path: @contentPath, load:true
+      unless file.isDirectory()
+        contents = file.getContentSync(text:true,overwrite:true)
+        contents.should.be.equal file.contents
+        loadContentTest contents, contentsForLoad, true
+  describe '#getContent', ->
+    it 'should load text contents of a path', (done)->
+      contentsForLoad = @content
+      loadContentTest = @loadContentTest
+      cwd = @cwd || __dirname
+      file = @File cwd: cwd, path: @contentPath, load:true
+      unless file.isDirectory()
+        file.getContent text:true, overwrite:true, (err, contents)->
+          if not err
+            contents.should.be.equal file.contents
+            loadContentTest contents, contentsForLoad, true
+          done(err)
+      else
+        done()
+
 fileBehaviorTest.loadFileContent = (contents, expectedContents, buffer, done)->
   if isFunction buffer
     done = buffer

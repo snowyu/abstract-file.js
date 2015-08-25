@@ -160,7 +160,8 @@ describe 'AbstractFile', ->
         base: 'hhah', cwd: '/path/dff'
       result.loadContent buffer:true, text: true, (err, contents)->
         should.exist contents
-        contents.should.be.equal result.path
+        contents.should.be.instanceOf Buffer
+        result.contents.should.be.equal result.path
         done(err)
     it 'should load content after stat', (done)->
       result = new FakeFile 'path',
@@ -258,7 +259,8 @@ describe 'AbstractFile', ->
         base: 'hhah', cwd: '/path/dff'
       contents = result.loadContentSync buffer:true, text:true
       should.exist contents
-      contents.should.be.equal result.path
+      contents.should.be.instanceOf Buffer
+      result.contents.should.be.equal result.path
       result.isBuffer().should.be.false
       result.isText().should.be.true
     it 'should load content after stat', ->
@@ -353,6 +355,14 @@ describe 'AbstractFile', ->
         should.exist contents
         contents.should.be.equal result.path
         done(err)
+    it 'should get loaded content as buffer', (done)->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff', load:true, read:true, text:true
+      result.getContent text:false, (err, contents)->
+        should.exist contents
+        contents.should.be.instanceOf Buffer
+        contents.toString().should.be.equal result.path
+        done(err)
     it 'should getContent with skipSize', (done)->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff',
@@ -404,6 +414,12 @@ describe 'AbstractFile', ->
     it 'should getContent as text', ->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff',
+      contents = result.getContentSync text:true
+      should.exist contents
+      contents.should.be.equal result.path
+    it 'should get loaded content as text', ->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff', load:true, read:true
       contents = result.getContentSync text:true
       should.exist contents
       contents.should.be.equal result.path

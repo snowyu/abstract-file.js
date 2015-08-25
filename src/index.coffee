@@ -56,7 +56,7 @@ module.exports = class AbstractFile
   isSame: (obj)->orgIsSame.call @, obj, ['contents', 'history']
   isStream: -> isStream @contents
   isBuffer: -> isBuffer @contents
-  isText: -> isString @contents
+  isText: -> !!@encoding
   isDirectory: ->
     if @hasOwnProperty('stat') and @stat and isFunction(@stat.isDirectory)
       result = @stat.isDirectory()
@@ -74,7 +74,7 @@ module.exports = class AbstractFile
 
   loaded: (aOptions)->
     aOptions ?= @
-    @hasOwnProperty('contents') and @contents? and @validate(aOptions, false)
+    @hasOwnProperty('contents') and @_contents? and @validate(aOptions, false)
 
   load: (aOptions, done)->
     if isFunction aOptions
@@ -92,7 +92,13 @@ module.exports = class AbstractFile
         if aOptions.read and stat? and !loaded
           @_loadContent aOptions, (err, result)=>
             unless err
-              @contents = result
+              if aOptions.encoding or aOptions.text
+                vEncoding = aOptions.encoding
+                vEncoding ?= 'utf8'
+                @encoding = vEncoding
+              else
+                @encoding = null
+              @_contents = result
               @skipSize = aOptions.skipSize if @skipSize isnt aOptions.skipSize
             done.call @, err, result
         else
@@ -117,7 +123,13 @@ module.exports = class AbstractFile
       if aOptions.read and @stat? and !@loaded(aOptions)
         if isFunction(@_loadContentSync)
           @skipSize = aOptions.skipSize if @skipSize isnt aOptions.skipSize
-          @contents = @_loadContentSync(aOptions)
+          if aOptions.encoding or aOptions.text
+            vEncoding = aOptions.encoding
+            vEncoding ?= 'utf8'
+            @encoding = vEncoding
+          else
+            @encoding = null
+          @_contents = @_loadContentSync(aOptions)
         else
           ### !pragma coverage-skip-next ###
           throw new TypeError '_loadContentSync not implemented'
@@ -181,15 +193,20 @@ module.exports = class AbstractFile
     aOptions = @getOptions(aOptions)
     aOptions.read = true
     if !aOptions.reload and @loaded(aOptions)
-      result = @contents
-      result = result.toString() if aOptions.text and !isString result
+      result = @_contents
       if aOptions.overwrite isnt false
         @skipSize = aOptions.skipSize if @skipSize isnt aOptions.skipSize
       done(null, result)
     else
       @_loadContent aOptions, (err, result)=>
         unless err or aOptions.overwrite is false
-          @contents = result
+          if aOptions.encoding or aOptions.text
+            vEncoding = aOptions.encoding
+            vEncoding ?= 'utf8'
+            @encoding = vEncoding
+          else
+            @encoding = null
+          @_contents = result
           @skipSize = aOptions.skipSize if @skipSize isnt aOptions.skipSize
         done(err, result)
         return
@@ -201,12 +218,17 @@ module.exports = class AbstractFile
       aOptions.read = true
       if !aOptions.reload and @loaded(aOptions)
         result = @contents
-        result = result.toString() if aOptions.text and !isString result
       else
         result = @_loadContentSync aOptions
       if aOptions.overwrite isnt false
+        if aOptions.encoding or aOptions.text
+          vEncoding = aOptions.encoding
+          vEncoding ?= 'utf8'
+          @encoding = vEncoding
+        else
+          @encoding = null
         @skipSize = aOptions.skipSize if @skipSize isnt aOptions.skipSize
-        @contents = result
+        @_contents = result
     else
       ### !pragma coverage-skip-next ###
       throw new TypeError 'loadContentSync not implemented'
@@ -233,8 +255,12 @@ module.exports = class AbstractFile
     aOptions.buffer = true
     aOptions.overwrite = false unless aOptions.overwrite?
     result = @loadContentSync(aOptions)
-    if aOptions.skipSize > 0 and isFunction result.slice
-      result = result.slice(aOptions.skipSize)
+    if result
+      if aOptions.text and !isString result
+        vEncoding = aOptions.encoding if aOptions.encoding
+        result = result.toString(vEncoding)
+      if aOptions.skipSize > 0 and isFunction result.slice
+        result = result.slice(aOptions.skipSize)
     result
 
   getContent: (aOptions, done)->
@@ -244,8 +270,12 @@ module.exports = class AbstractFile
     aOptions.buffer = true
     aOptions.overwrite = false unless aOptions.overwrite?
     @loadContent aOptions, (err, result)->
-      if result and aOptions.skipSize > 0 and isFunction result.slice
-        result = result.slice(aOptions.skipSize)
+      if result
+        if aOptions.text and !isString result
+          vEncoding = aOptions.encoding if aOptions.encoding
+          result = result.toString(vEncoding)
+        if aOptions.skipSize > 0 and isFunction result.slice
+          result = result.slice(aOptions.skipSize)
       done(err, result)
 
   pipe: (aStream, options)->

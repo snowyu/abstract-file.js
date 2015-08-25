@@ -24,8 +24,6 @@ module.exports = class FakeFile
     if aOptions.buffer isnt false
       if aOptions.dir
         [1,2]
-      else if aOptions.text
-        aOptions.path
       else
         new Buffer(aOptions.path)
     else
