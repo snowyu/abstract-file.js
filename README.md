@@ -84,23 +84,21 @@ the File and Folder implementation are in the [custom-file](https://github.com/s
     * return contents only available when `read` is true
 * `loadContent(aOptions, done)`: Asynchronous load file contents.
     * `buffer` *(Boolean)*: whether load file contents as buffer or stream, defaults to true.
-    * `text` *(Boolean)*: whether load file contents as text, defaults to false.
-       only available for `buffer` is true.
     * `reload` *(Boolean)*: whether force to reload the contents from the file. defaults to false.
     * `overwrite` *(Boolean)*: whether assign to this.contents after loading the contents from the file. defaults to true.
   * `done` *Function(err, content)*: the callback function.
 * `loadContentSync(aOptions)`: Synchronous load file contents.
     * `buffer` *(Boolean)*: whether load file contents as buffer or stream, defaults to true.
-    * `text` *(Boolean)*: whether load file contents as text, defaults to false.
-       only available for `buffer` is true.
     * `reload` *(Boolean)*: whether force to reload the contents from the file. defaults to false.
     * `overwrite` *(Boolean)*: whether assign to this.contents after loading the contents from the file. defaults to true.
     * return contents
 * `getContent(aOptions, done)`: Asynchronous get the file contents buffer, skipSize used.
   only available for File(not for folder)
+  * `text` *(Boolean)*: whether load file contents as text, defaults to false.
   * `done` *Function(err, content)*: the callback function.
 * `getContentSync(aOptions)`: Synchronous get the file contents buffer, skipSize used.
   only available for File(not for folder)
+  * `text` *(Boolean)*: whether load file contents as text, defaults to false.
 * `loadStat(aOptions, done)`: Asynchronous load file stats.
   * `done` *Function(err, stat)*: the callback function.
 * `loadStatSync(aOptions)`: Synchronous load file stats.
@@ -126,6 +124,17 @@ these methods should be overrides:
 * _inspect()
 
 ## Changes
+
+### v0.4
+
++ with new property-manager v0.10.0
++ base object(prototypeOf) supports
+* add overwrite option to getContent/getContentSync
+* [bug] getContent should get loaded content as the buffer when text is false.
+  + `encoding` *(String)* attribute if the contents is a text.
+  + `_contents` *(Buffer|Stream)* internal attribute
+  * change the `contents` attribute to a dynamic attirbute.
+* **broken** the loadContent return the `_contents`(Buffer|Stream) now.
 
 ### v0.3
 
