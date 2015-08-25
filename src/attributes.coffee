@@ -44,6 +44,10 @@ module.exports =
     exported: false
     assign: (value)-> if isArray(value) then value.slice() else []
   stat: null
+  _contents:
+    assigned: false
+  encoding:
+    type: 'String'
   contents:
     assign: (value, dest, src, name)->
       if isStream value
@@ -54,6 +58,12 @@ module.exports =
           highWaterMark: value._readableState.highWaterMark
         value = src.loadContentSync opts
       value
+    set: (value)-> @_contents = value
+    get: ->
+      result = @_contents
+      if result and @encoding and isBuffer result
+        result = result.toString(@encoding)
+      result
   # the skipped length from beginning of contents.
   # this could get the contents quickly later.
   skipSize:
