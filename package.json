@@ -1,7 +1,7 @@
 {
   "name": "abstract-file",
   "description": "It can be used on any virtual file system, and stream supports.",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "homepage": "https://github.com/snowyu/abstract-file.js",
   "repository": {
     "type": "git",
