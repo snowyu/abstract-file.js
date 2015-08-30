@@ -74,7 +74,7 @@ module.exports = class AbstractFile
 
   loaded: (aOptions)->
     aOptions ?= @
-    @hasOwnProperty('contents') and @_contents? and @validate(aOptions, false)
+    @hasOwnProperty('_contents') and @_contents? and @validate(aOptions, false)
 
   load: (aOptions, done)->
     if isFunction aOptions

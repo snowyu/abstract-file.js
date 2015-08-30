@@ -568,6 +568,7 @@ describe 'AbstractFile', ->
       result = {}
       setPrototypeOf result, base
       result.should.not.have.ownProperty 'contents'
+      result.should.not.have.ownProperty '_contents'
       stream = through2 (dat, enc, cb)->
         cb(null, dat)
         return
@@ -616,3 +617,15 @@ describe 'AbstractFile', ->
         .on 'end', ->
           data.should.be.equal result.path
           done()
+  describe '#loaded', ->
+    it 'should check loaded.', ->
+      base = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff', load:true,read:true
+      result = {}
+      setPrototypeOf result, base
+      result.contents = 'test'
+      result.should.have.ownProperty '_contents'
+      contents = result._contents
+      should.exist contents
+      contents.should.be.equal 'test'
+      result.loaded().should.be.true
