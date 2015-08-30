@@ -97,7 +97,7 @@ module.exports = class AbstractFile
                 vEncoding ?= 'utf8'
                 @encoding = vEncoding
               else
-                @encoding = null
+                @encoding = undefined
               @_contents = result
               @skipSize = aOptions.skipSize if @skipSize isnt aOptions.skipSize
             done.call @, err, result
@@ -128,7 +128,7 @@ module.exports = class AbstractFile
             vEncoding ?= 'utf8'
             @encoding = vEncoding
           else
-            @encoding = null
+            @encoding = undefined
           @_contents = @_loadContentSync(aOptions)
         else
           ### !pragma coverage-skip-next ###
@@ -205,7 +205,7 @@ module.exports = class AbstractFile
             vEncoding ?= 'utf8'
             @encoding = vEncoding
           else
-            @encoding = null
+            @encoding = undefined
           @_contents = result
           @skipSize = aOptions.skipSize if @skipSize isnt aOptions.skipSize
         done(err, result)
@@ -226,7 +226,7 @@ module.exports = class AbstractFile
           vEncoding ?= 'utf8'
           @encoding = vEncoding
         else
-          @encoding = null
+          @encoding = undefined
         @skipSize = aOptions.skipSize if @skipSize isnt aOptions.skipSize
         @_contents = result
     else
