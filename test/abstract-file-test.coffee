@@ -96,6 +96,11 @@ describe 'AbstractFile', ->
     it 'should get dirname', ->
       result = new File path: '/path/dff/xie', base: 'hhah', cwd: '/path/dff'
       result.dirname.should.be.equal '/path/dff'
+    it 'should get the dirname of a folder', ->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff',
+      stat = result.loadStatSync(dir:true)
+      result.dirname.should.be.equal '/path/dff/hhah/path'
   describe '#basename', ->
     it 'should get basename', ->
       result = new File path: '/path/dff/xie.md', base: 'hhah', cwd: '/path/dff'

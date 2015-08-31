@@ -79,7 +79,11 @@ module.exports =
   dirname:
     assigned: false
     exported: false
-    get: -> path.dirname @path
+    get: ->
+      if @isDirectory()
+        @path
+      else
+        path.dirname @path
   basename:
     assigned: false
     exported: false
