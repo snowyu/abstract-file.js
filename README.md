@@ -125,6 +125,15 @@ these methods should be overrides:
 
 ## Changes
 
+### v0.5
+
+* the dirname attribute should pass the path directly if the file is a folder.
+
+    if @isDirectory()
+      @path
+    else
+      path.dirname @path
+
 ### v0.4
 
 + with new property-manager v0.10.0
