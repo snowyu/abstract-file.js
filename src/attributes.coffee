@@ -60,7 +60,7 @@ module.exports =
       value
     set: (value)-> @_contents = value
     get: ->
-      result = @_contents
+      result = @_contents if @hasOwnProperty '_contents'
       if result and @encoding and isBuffer result
         result = result.toString(@encoding)
       result

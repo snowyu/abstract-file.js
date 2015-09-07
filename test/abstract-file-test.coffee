@@ -628,6 +628,9 @@ describe 'AbstractFile', ->
         base: 'hhah', cwd: '/path/dff', load:true,read:true
       result = {}
       setPrototypeOf result, base
+      result.loaded().should.be.false
+      result.should.not.have.ownProperty '_contents'
+      expect(result.contents).to.not.exist
       result.contents = 'test'
       result.should.have.ownProperty '_contents'
       contents = result._contents
