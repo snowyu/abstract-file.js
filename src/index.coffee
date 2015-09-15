@@ -304,3 +304,5 @@ module.exports = class AbstractFile
     else if options.end # isUndefined
       aStream.end()
     return aStream
+
+  setContents: (value)->@_contents = value

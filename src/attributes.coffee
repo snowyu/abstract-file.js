@@ -58,7 +58,7 @@ module.exports =
           highWaterMark: value._readableState.highWaterMark
         value = src.loadContentSync opts
       value
-    set: (value)-> @_contents = value
+    set: (value)-> @setContents(value)
     get: ->
       result = @_contents if @hasOwnProperty '_contents'
       if result and @encoding and isBuffer result
