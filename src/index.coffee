@@ -254,13 +254,17 @@ module.exports = class AbstractFile
     aOptions = {} unless isObject aOptions
     aOptions.buffer = true
     aOptions.overwrite = false unless aOptions.overwrite?
+    if aOptions.skipSize?
+      vSkipSize = aOptions.skipSize
+      aOptions.skipSize = undefined
     result = @loadContentSync(aOptions)
     if result
       if aOptions.text and !isString result
         vEncoding = aOptions.encoding if aOptions.encoding
         result = result.toString(vEncoding)
-      if aOptions.skipSize > 0 and isFunction result.slice
-        result = result.slice(aOptions.skipSize)
+      vSkipSize ?= aOptions.skipSize
+      if vSkipSize > 0 and isFunction result.slice
+        result = result.slice(vSkipSize)
     result
 
   getContent: (aOptions, done)->
@@ -269,13 +273,17 @@ module.exports = class AbstractFile
     aOptions = {} unless isObject aOptions
     aOptions.buffer = true
     aOptions.overwrite = false unless aOptions.overwrite?
+    if aOptions.skipSize?
+      vSkipSize = aOptions.skipSize
+      aOptions.skipSize = undefined
     @loadContent aOptions, (err, result)->
       if result
         if aOptions.text and !isString result
           vEncoding = aOptions.encoding if aOptions.encoding
           result = result.toString(vEncoding)
-        if aOptions.skipSize > 0 and isFunction result.slice
-          result = result.slice(aOptions.skipSize)
+        vSkipSize ?= aOptions.skipSize
+        if vSkipSize > 0 and isFunction result.slice
+          result = result.slice(vSkipSize)
       done(err, result)
 
   pipe: (aStream, options)->

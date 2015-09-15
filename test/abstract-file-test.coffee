@@ -377,6 +377,16 @@ describe 'AbstractFile', ->
         s = contents.toString()
         s.should.be.equal result.path.substr(1)
         done(err)
+    it 'should getContent with skipSize and overwrite', (done)->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff',
+      result.getContent overwrite:true, skipSize:1, (err, contents)->
+        should.exist contents
+        contents.should.be.instanceof Buffer
+        s = contents.toString()
+        s.should.be.equal result.path.substr(1)
+        expect(result.skipSize).to.be.not.exist
+        done(err)
     it 'should getContent via fixed skipSize(load)', (done)->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff',
@@ -428,12 +438,19 @@ describe 'AbstractFile', ->
       contents = result.getContentSync text:true
       should.exist contents
       contents.should.be.equal result.path
-    it 'should getContent as text with skipSize', ->
+    it 'should getContent with skipSize', ->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff',
       contents = result.getContentSync(skipSize:1, text:true)
       should.exist contents
       contents.should.be.equal result.path.substr(1)
+    it 'should getContent with skipSize and overwrite', ->
+      result = new FakeFile 'path',
+        base: 'hhah', cwd: '/path/dff',
+      contents = result.getContentSync(overwrite:true, skipSize:1, text:true)
+      should.exist contents
+      contents.should.be.equal result.path.substr(1)
+      expect(result.skipSize).to.be.not.exist
     it 'should getContent via fixed skipSize(load)', ->
       result = new FakeFile 'path',
         base: 'hhah', cwd: '/path/dff',
