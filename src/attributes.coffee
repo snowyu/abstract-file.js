@@ -1,4 +1,3 @@
-path            = require('path.js/lib/path').path
 isObject        = require 'util-ex/lib/is/type/object'
 isArray         = require 'util-ex/lib/is/type/array'
 isString        = require 'util-ex/lib/is/type/string'
@@ -13,10 +12,23 @@ module.exports =
   cwd:
     value: ''
     type: 'String'
+    get: -> @_cwd || @fs.path.resolve '.'
+    set: (value)->
+      @_cwd = value
+      @updatePath()
+      return
   base:
     type: 'String'
-    get: ->@_base || @cwd
-    set: (value)->@_base = path.resolve @cwd, value
+    get: ->
+      if @_base
+        #TODO: should I use a _orgBase to speedup this?
+        result = @fs.path.resolve @cwd, @_base
+      else
+        result = @cwd
+      result
+    set: (value)->
+      @_base = value
+      @updatePath()
   path:
     type: 'String'
     get: ->@_path
@@ -24,13 +36,19 @@ module.exports =
       if isObject(value) and isString(value.path)
         value = value.path
       if isString(value)
-        @cwd = path.resolve '.' unless @cwd
-        @_path = value = path.resolve @cwd, @base, value
-        len = @history.length
-        @history.push value if !len or value isnt @history[len-1]
+        @updatePath value
+      return
   name:
     type: 'String'
+  _cwd:
+    type: 'String'
+    assigned: false
+    exported: false
   _base:
+    type: 'String'
+    assigned: false
+    exported: false
+  _orgPath:
     type: 'String'
     assigned: false
     exported: false
@@ -72,6 +90,7 @@ module.exports =
     assigned: false
     exported: false
     get: ->
+      path = @fs.path
       if @base isnt @path
         path.relative @base, @path
       else
@@ -83,12 +102,12 @@ module.exports =
       if @isDirectory()
         @path
       else
-        path.dirname @path
+        @fs.path.dirname @path
   basename:
     assigned: false
     exported: false
-    get: -> path.basename @path
+    get: -> @fs.path.basename @path
   extname:
     assigned: false
     exported: false
-    get: -> path.extname @path
+    get: -> @fs.path.extname @path

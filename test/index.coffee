@@ -6,8 +6,6 @@ expect          = chai.expect
 assert          = chai.assert
 chai.use(sinonChai)
 
-fs                = require 'fs'
-path              = require('path.js/lib/path').path
 isObject          = require 'util-ex/lib/is/type/object'
 isFunction        = require 'util-ex/lib/is/type/function'
 Stream            = require 'stream'
@@ -21,7 +19,8 @@ describe 'File Class', ->
     @File = File
   abstractFileBehaviorTest()
 ###
-module.exports = fileBehaviorTest = ->
+module.exports = fileBehaviorTest = (fs = require('fs'))->
+  path = fs.path
   testFileOptions = (acturalOpts, expectedOpts)->
     for k,v of expectedOpts
       if v?

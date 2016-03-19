@@ -28,7 +28,7 @@ module.exports = class AbstractFile
     gfs = value
     if value
       path.cwd = value.cwd if isFunction value.cwd
-      gfs.path = path
+      gfs.path = value.path || path
     return
 
   defineProperty @, 'fs', undefined,
@@ -67,10 +67,20 @@ module.exports = class AbstractFile
   inspect: -> '<'+ @constructor.name + ' ' + @_inspect() + '>'
   getOptions: (aOptions)->
     result = @mergeTo(aOptions, ['contents','history'])
-    result.path = @path
-    result.base = @base
     result.cwd = @cwd
+    result.base = @base
+    result.path = @path
     result
+  updatePath: (value)->
+    if isString(value) and value isnt @_orgPath
+      @_orgPath = value
+    if @_orgPath
+      cwd = @cwd
+      cwd = path.resolve '.' unless cwd
+      @_path = value = gfs.path.resolve cwd, @base, @_orgPath
+      len = @history.length
+      @history.push value if !len or value isnt @history[len-1]
+
 
   loaded: (aOptions)->
     aOptions ?= @

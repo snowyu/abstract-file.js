@@ -9,7 +9,7 @@ chai.use(sinonChai)
 Stream          = require('stream').Stream
 through2        = require 'through2'
 fs              = require 'fs'
-fs.cwd          = process.cwd
+fs.cwd          = -> '/fake/cwd' #process.cwd
 inherits        = require 'inherits-ex/lib/inherits'
 setPrototypeOf  = require 'inherits-ex/lib/setPrototypeOf'
 extend          = require 'util-ex/lib/_extend'
@@ -90,8 +90,10 @@ describe 'AbstractFile', ->
       result.relative.should.be.equal '../xie'
     it 'should get relative path with same base', ->
       result = new File path: 'hha', cwd: '/path/dff'
+      result.path.should.be.equal '/path/dff/hha'
       result.base = '/path/dff/hha'
-      result.relative.should.be.equal '.'
+      result.path.should.be.equal '/path/dff/hha/hha'
+      result.relative.should.be.equal 'hha'
   describe '#dirname', ->
     it 'should get dirname', ->
       result = new File path: '/path/dff/xie', base: 'hhah', cwd: '/path/dff'
@@ -645,12 +647,13 @@ describe 'AbstractFile', ->
         base: 'hhah', cwd: '/path/dff', load:true,read:true
       result = {}
       setPrototypeOf result, base
-      result.loaded().should.be.false
+      expect(result.loaded(), 'not loaded').to.be.false
       result.should.not.have.ownProperty '_contents'
-      expect(result.contents).to.not.exist
+      expect(result.contents, 'contents not exist').to.be.not.exist
       result.contents = 'test'
       result.should.have.ownProperty '_contents'
       contents = result._contents
       should.exist contents
       contents.should.be.equal 'test'
-      result.loaded().should.be.true
+      result.stat = {}
+      expect(result.loaded(), 'loaded').to.be.true
