@@ -21,9 +21,9 @@ Try to keep compatibility with [vinyl][vinyl].
     * load stat
     * load content
 * abstract folder/directory supports: It's the array of file object and [read-dir-stream](https://github.com/snowyu/read-dir-stream.js)
-* abstract [path.js](https://github.com/snowyu/path.js)
 * abstract fs: It should apply via `AbstractFile.fs = fs`
-* abstract cwd: It should apply via `fs.cwd = process.cwd`
+  * abstract cwd: It should apply via `fs.cwd = process.cwd`
+  * abstract [path.js](https://github.com/snowyu/path.js): It should apply via `fs.path = require('path.js')`
 
 ## Usage
 
